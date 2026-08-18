@@ -1,0 +1,28 @@
+name: Deploy Wine Night
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch current wine app
+        run: |
+          curl -fsSL 'https://ttympdkjbtuspmroasae.supabase.co/functions/v1/wine-night-gh?event=BURGUND' -o wine-night.html
+          test -s wine-night.html
+          head -c 20 wine-night.html
+
+      - name: Publish public link
+        run: |
+          PUBLIC_URL=$(curl -fsS -X POST 'https://hurl.page/deploy?ttl=604800' \
+            -H 'Content-Type: text/html' \
+            --data-binary @wine-night.html)
+          echo "PUBLIC_URL=$PUBLIC_URL"
+          echo "## Mitspieler-Link" >> "$GITHUB_STEP_SUMMARY"
+          echo "$PUBLIC_URL" >> "$GITHUB_STEP_SUMMARY"
