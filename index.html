@@ -6,13 +6,22 @@
 @media(max-width:560px){.avgrow{grid-template-columns:82px 1fr 1fr}.scorebreak.four{grid-template-columns:1fr}}
 
 .sliderfield{margin:18px 0 22px;padding:14px;border:1px solid #eadfd9;border-radius:14px;background:#faf6f2}.sliderhead{display:flex;justify-content:space-between;gap:12px;align-items:center}.sliderhead b{font-size:.93rem}.slidervalue{min-width:46px;text-align:center;border-radius:99px;background:#eadce1;color:var(--wd);padding:4px 8px;font-weight:900;font-size:.8rem}.sliderfield input[type=range]{width:100%;padding:0;margin:14px 0 7px;accent-color:var(--w);box-shadow:none;border:0;background:transparent}.sliderfield input[type=range].unset{opacity:.48}.sliderends{display:flex;justify-content:space-between;gap:12px;color:var(--m);font-size:.72rem;font-weight:750}.simpleintro{background:#f3e5e9;border-radius:13px;padding:11px 12px;margin:8px 0 16px;color:var(--wd);font-size:.84rem}.simplegroup{margin-top:20px}.simplegroup .sectiontitle{margin-bottom:8px}
-</style></head><body><main id="app"></main><div id="toast"></div><script>
-const U='https://ttympdkjbtuspmroasae.supabase.co';
-const K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoidHR5bXBka2pidHVzcG1yb2FzYWUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzA1Njk3NiwiZXhwIjoyMTAyNjMyOTc2fQ.QX6dYb4q0hqWDl4tgIY4acwiA4lLvjpZrGoVs1yTNuE';
-const EMBEDDED_HOST='KeMv2wekvALe9nH9wm9SV1ZHCeUeXVsP';
-const APP_VERSION='public-simple-20260818-2';
+</style></head><body><main id="app"></main><div id="toast" aria-live="polite"></div><script>const U='https://ttympdkjbtuspmroasae.supabase.co';
+const K='sb_publishable_DU0CCnKdiA5NBG7ut-cF1g_QEj9PL3I';
+const APP_VERSION='github-preview-20260818-1';
 const FIXED_PEOPLE=['Axel','Olli','Nadine','Anja'];
-const q=new URLSearchParams(location.search);
+const EMBEDDED_HOST='KeMv2wekvALe9nH9wm9SV1ZHCeUeXVsP';
+
+const PREVIEW_HOST=location.hostname==='htmlpreview.github.io';
+const SOURCE_ENDPOINT='https://ttympdkjbtuspmroasae.supabase.co/functions/v1/wine-night-gh';
+function currentParams(){
+  if(PREVIEW_HOST){try{return new URL(location.search.substring(1)).searchParams}catch(_){}}
+  return new URLSearchParams(location.search);
+}
+function navTarget(search=''){
+  return PREVIEW_HOST?`https://htmlpreview.github.io/?${SOURCE_ENDPOINT}${search}`:`${location.origin}${location.pathname}${search}`;
+}
+const q=currentParams();
 const E=(q.get('event')||(!q.get('room')?'BURGUND':null))?.toUpperCase();
 const R=q.get('room')?.toUpperCase();
 const hostFromUrl=q.get('host');
@@ -20,7 +29,7 @@ if(hostFromUrl&&E){
   sessionStorage.setItem(`wt_host_${E}`,hostFromUrl);
   q.delete('host');
   q.set('hostmode','1');
-  history.replaceState(null,'',`${location.pathname}?${q.toString()}`);
+  if(PREVIEW_HOST)location.href=navTarget(`?${q.toString()}`);else history.replaceState(null,'',`${location.pathname}?${q.toString()}`);
 }
 const H=q.get('hostmode')==='1'&&E?(sessionStorage.getItem(`wt_host_${E}`)||EMBEDDED_HOST):null;
 const KIOSK=q.get('kiosk')!=='0'&&!!E;
@@ -43,7 +52,7 @@ function brand(extra=''){return`<div class="brand"><b>🍷 Blind Tasting</b>${ex
 function toast(x){T.textContent=x;T.className='show';setTimeout(()=>T.className='',2300)}
 async function rpc(f,p={}){const r=await fetch(`${U}/rest/v1/rpc/${f}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:K},body:JSON.stringify(p)});const d=await r.json().catch(()=>null);if(!r.ok){const x=Error(d?.message||'Fehler');x.code=d?.code||'';throw x}return d}
 function missingRpc(x){return x?.code==='PGRST202'||/could not find the function|schema cache|does not exist/i.test(x?.message||'')}
-async function rpcCompat(primary,fallback,p={}){try{return await rpc(primary,p)}catch(x){if(fallback&&missingRpc(x))return await rpc(fallback,p);throw x}}
+async function rpcCompat(primary,fallback,p={}){try{return await rpc(primary,p)}catch(x){if(fallback&&missingRpc(x))return rpc(fallback,p);throw x}}
 function nameKey(){return`wt_portal_name_${E||'default'}`}
 function kioskNamesKey(){return`wt_kiosk_names_${E||'default'}`}
 function kioskActiveKey(){return`wt_kiosk_active_${E||'default'}`}
@@ -55,8 +64,8 @@ function clearActiveName(){if(KIOSK)localStorage.removeItem(kioskActiveKey());el
 function tokenKey(room){const n=KIOSK?getName():'';return KIOSK?`wt_${room}_${encodeURIComponent(n.trim().toLowerCase())}`:`wt_${room}`}
 function getSession(room){try{return JSON.parse(localStorage.getItem(tokenKey(room))||'null')}catch{return null}}
 function setSession(room,s){localStorage.setItem(tokenKey(room),JSON.stringify(s))}
-function portalLink(){return`${location.origin}${location.pathname}?event=${encodeURIComponent(E||'BURGUND')}${KIOSK?'&kiosk=1':''}`}
-function backLink(){const u=E?`?event=${encodeURIComponent(E)}${KIOSK?'&kiosk=1':''}`:'#';return E?`<a class="backlink" href="${u}" data-nav="${u}">← ${KIOSK?'Personen / Themen':'Themen'}</a>`:''}
+function portalLink(){return navTarget(`?event=${encodeURIComponent(E||'BURGUND')}${KIOSK?'&kiosk=1':''}`)}
+function backLink(){const u=E?navTarget(`?event=${encodeURIComponent(E)}${KIOSK?'&kiosk=1':''}`):'#';return E?`<a class="backlink" href="${u}" data-nav="${u}">← ${KIOSK?'Personen / Themen':'Themen'}</a>`:''}
 function clearPoll(){if(poll){clearInterval(poll);clearTimeout(poll);poll=null}}
 function historyKey(room){return`wt_reveal_${room}`}
 function cacheReveal(room,data,theme){try{localStorage.setItem(historyKey(room),JSON.stringify({room_code:room,theme:theme||data.theme||room,leaderboard:data.leaderboard||[],saved_at:Date.now()}))}catch{}}
@@ -71,12 +80,12 @@ async function portal(){
   const name=getName();
   if(!name){
     A.innerHTML=brand(`<span class="room">Portal</span>`)+`<section class="card hero"><div class="ey">Blindverkostung</div><h2>${e(d.title)}</h2><p class="muted">${e(d.description||'')}</p><form id="nameform"><div class="field"><label>Dein Name</label><input id="pname" maxlength="40" required autocomplete="name"></div><button class="btn primary full">Weiter</button></form></section>`;
-    {const form=document.getElementById('nameform'),input=document.getElementById('pname');form.onsubmit=x=>{x.preventDefault();const n=input.value.trim();if(!n)return;setActiveName(n);portal()}};return;
+    nameform.onsubmit=x=>{x.preventDefault();const n=pname.value.trim();if(!n)return;setActiveName(n);portal()};return;
   }
   const history=await loadEventLeaderboard(d);
   A.innerHTML=brand(`<span class="room">${e(name)}</span>`)+`<section class="card hero"><div class="ey">Tastings</div><h2>${e(d.title)}</h2><p class="muted">Wähle ein Paar. Dein Name gilt für alle Tastings auf diesem Gerät.</p><button id="rename" class="linkbtn">Name ändern</button></section><div class="pairlist">${d.rooms.map(pairCard).join('')}</div>${eventLeaderboard(history,'Abend-Leaderboard')}`;
-  document.getElementById('rename').onclick=()=>{clearActiveName();portal()};
-  document.querySelectorAll('[data-room]').forEach(x=>x.onclick=async()=>{await flushAll();location.href=`?event=${encodeURIComponent(E)}&room=${encodeURIComponent(x.dataset.room)}`});
+  rename.onclick=()=>{clearActiveName();portal()};
+  document.querySelectorAll('[data-room]').forEach(x=>x.onclick=async()=>{await flushAll();location.href=navTarget(`?event=${encodeURIComponent(E)}&room=${encodeURIComponent(x.dataset.room)}`)});
 }
 
 async function kioskPortal(d){
@@ -85,13 +94,13 @@ async function kioskPortal(d){
   if(!active){
     A.innerHTML=brand(`<span class="room">1 Handy</span>`)+`<section class="card hero"><div class="ey">Gemeinsames Handy</div><h2>Wer ist dran?</h2><p class="muted">Tippt einfach auf euren Namen. Alle Antworten bleiben sauber getrennt.</p><div class="grid two" id="people">${names.map(n=>`<button class="choice" data-person="${e(n)}">${e(n)}</button>`).join('')}</div><button id="hostbutton" class="linkbtn hostexit">⚙️ Host-Steuerung</button></section>`;
     document.querySelectorAll('[data-person]').forEach(x=>x.onclick=()=>{setActiveName(x.dataset.person);portal()});
-    document.getElementById('hostbutton').onclick=()=>{const pin=prompt('Host-PIN');if(pin==='1847')location.href=`?event=${encodeURIComponent(E)}&hostmode=1`;else if(pin!==null)toast('Falscher Host-PIN')};
+    hostbutton.onclick=()=>{const pin=prompt('Host-PIN');if(pin==='1847')location.href=navTarget(`?event=${encodeURIComponent(E)}&hostmode=1`);else if(pin!==null)toast('Falscher Host-PIN')};
     return;
   }
   const history=await loadEventLeaderboard(d);
   A.innerHTML=brand(`<span class="room">${e(active)}</span>`)+`<section class="card hero"><div class="ey">Gemeinsames Handy</div><h2>${e(active)} ist dran</h2><p class="muted">Wähle ein Weinpaar. Deine Angaben werden automatisch gespeichert.</p><button id="switchperson" class="btn secondary full">👤 Teilnehmer wechseln</button></section><div class="pairlist">${d.rooms.map(pairCard).join('')}</div>${eventLeaderboard(history,'Abend-Leaderboard')}`;
-  document.getElementById('switchperson').onclick=()=>{clearActiveName();portal()};
-  document.querySelectorAll('[data-room]').forEach(x=>x.onclick=async()=>{await flushAll();location.href=`?event=${encodeURIComponent(E)}&room=${encodeURIComponent(x.dataset.room)}&kiosk=1`});
+  switchperson.onclick=()=>{clearActiveName();portal()};
+  document.querySelectorAll('[data-room]').forEach(x=>x.onclick=async()=>{await flushAll();location.href=navTarget(`?event=${encodeURIComponent(E)}&room=${encodeURIComponent(x.dataset.room)}&kiosk=1`)});
 }
 function pairCard(r){
   const s=getSession(r.code),phase=r.phase==='tasting'?'Freie Verkostung':r.phase==='profiles'?'Profile offen':'Aufgelöst';
@@ -103,70 +112,106 @@ function pairCard(r){
 async function roomBoot(){
   clearPoll();const S=getSession(R);
   try{st=await rpc('get_public_state',{p_code:R,p_token:S?.token||null})}catch{xRoom('Paar nicht gefunden');return}
-  if(!S){
-    const n=KIOSK?getName():getName();if(!n){location.href=portalLink();return}
-    const joined=await rpc('join_room',{p_code:R,p_name:n});setSession(R,{token:joined.token,name:n});return roomBoot();
+  if(!S||!st.me){
+    const n=getName();
+    if(n){try{const d=await rpc('join_tasting',{p_code:R,p_name:n});setSession(R,{token:d.token,name:d.name});return roomBoot()}catch(x){if(!/schon vergeben/i.test(x.message))toast(x.message)}}
+    return joinRoom();
   }
-  if(st.phase==='tasting')return taste();
+  if(st.phase==='revealed')return reveal();
   if(st.phase==='profiles')return profiles();
-  if(st.phase==='revealed')return revealed();
+  const rows=await rpcCompat('get_my_answers_v2','get_my_answers',{p_code:R,p_token:S.token});
+  ans={1:blank(),2:blank()};rows.forEach(x=>ans[x.glass_no]={...blank(),...x,aromas:x.aromas||[]});resetSaveControls();taste();
+  poll=setInterval(async()=>{try{const x=await rpc('get_public_state',{p_code:R,p_token:S.token});if(x.phase!=='tasting')roomBoot()}catch{}},5000);
 }
-function xRoom(t){A.innerHTML=brand()+`<section class="card"><h2>${e(t)}</h2>${E?`<a class="btn secondary full center" href="${portalLink()}">Zurück</a>`:''}</section>`}
-
-function mergeAnswer(a){return{...blank(),...(a||{}),aromas:Array.isArray(a?.aromas)?a.aromas:[],client_revision:Number(a?.client_revision)||0}}
-function validCount(gl){return fieldsFor(st?.tasting_type).filter(k=>ans[gl][k]!=null&&ans[gl][k]!==''&&(k!=='aromas'||ans[gl].aromas?.length)).length}
-function complete(gl){const f=fieldsFor(st?.tasting_type);return f.every(k=>k==='aromas'?ans[gl].aromas?.length:ans[gl][k]!=null&&ans[gl][k]!=='')}
-function fieldsFor(t){if(t==='red_simple')return['nose_intensity','oak','body','tannin','acidity','finish'];if(t==='white')return['nose_intensity','swirl_open','aromas','acidity','body','texture','oak','mineral','retronasal','finish'];return['nose_intensity','swirl_open','aromas','acidity','tannin','body','texture','retronasal','finish']}
-function filledCount(gl){return validCount(gl)}
-function totalFields(){return fieldsFor(st?.tasting_type).length}
-
-async function hydrateAnswers(){const S=getSession(R);if(!S)return;try{const d=await rpcCompat('get_my_answers_v2','get_my_answers',{p_code:R,p_token:S.token});if(d?.[1])ans[1]=mergeAnswer(d[1]);if(d?.[2])ans[2]=mergeAnswer(d[2])}catch{}}
-function saveLabel(gl){const c=saveCtl[gl];return c.error?'Speicherfehler':c.inFlight||c.pending?'Speichert…':'Gespeichert'}
-function updateSaveLabel(gl){if(gl!==g)return;const z=document.getElementById('savestate');if(!z)return;z.textContent=saveLabel(gl);z.className=`pill ${saveCtl[gl].error?'warn':(!saveCtl[gl].inFlight&&!saveCtl[gl].pending?'done':'')}`}
-function queueSave(gl){const c=saveCtl[gl];ans[gl].is_complete=complete(gl);ans[gl].client_revision=(Number(ans[gl].client_revision)||0)+1;c.pending=true;c.error=false;clearTimeout(c.timer);c.timer=setTimeout(()=>runSave(gl),280);updateSaveLabel(gl)}
-async function runSave(gl){const c=saveCtl[gl];clearTimeout(c.timer);c.timer=null;if(c.inFlight)return c.promise;if(!c.pending)return;c.pending=false;c.inFlight=true;const S=getSession(R);if(!S){c.inFlight=false;return}const snapshot=JSON.parse(JSON.stringify(ans[gl]));c.promise=rpcCompat('save_answer_v2','save_answer',{p_code:R,p_token:S.token,p_glass:gl,p_answer:snapshot}).then(()=>{c.error=false}).catch(()=>{c.error=true;c.pending=true}).finally(()=>{c.inFlight=false;c.promise=null;updateSaveLabel(gl);if(c.pending&&!c.error)runSave(gl)});updateSaveLabel(gl);return c.promise}
-async function flushSave(gl){const c=saveCtl[gl];clearTimeout(c.timer);c.timer=null;if(c.inFlight)await c.promise;if(c.pending){c.error=false;await runSave(gl);if(c.inFlight)await c.promise}}
-async function flushAll(){await Promise.all([flushSave(1),flushSave(2)])}
-function keepaliveSave(gl){const c=saveCtl[gl],S=getSession(R);if(!S||(!c.pending&&!c.inFlight))return;try{fetch(`${U}/rest/v1/rpc/save_answer_v2`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:K},body:JSON.stringify({p_code:R,p_token:S.token,p_glass:gl,p_answer:{...ans[gl],is_complete:complete(gl)}})})}catch{}}
-
-async function taste(){
-  if(!st)return;if(!ans[1]._loaded){await hydrateAnswers();ans[1]._loaded=ans[2]._loaded=true}
-  const total=totalFields(),both=complete(1)&&complete(2);
+function xRoom(title){A.innerHTML=brand()+`<section class="card"><h2>${e(title)}</h2></section>`}
+function resetSaveControls(){for(const gl of [1,2]){clearTimeout(saveCtl[gl].timer);Object.assign(saveCtl[gl],saveControl())}}
+function joinRoom(){
+  A.innerHTML=brand(`<span class="room">${e(R)}</span>`)+`<section class="card hero">${backLink()}<div class="ey">${e(st.theme||st.title)}</div><h2>Mitmachen</h2><p class="muted">Einmal Namen eintragen. Danach werden deine Antworten automatisch gespeichert.</p><form id="j"><div class="field"><label>Dein Name</label><input id="n" maxlength="40" required value="${e(getName())}"></div><button class="btn primary full">Starten</button></form></section>`;
+  j.onsubmit=async x=>{x.preventDefault();try{const d=await rpc('join_tasting',{p_code:R,p_name:n.value});setSession(R,{token:d.token,name:d.name});if(E)setActiveName(d.name);roomBoot()}catch(z){toast(z.message)}};
+}
+function pick(k,o){return`<div class="grid">${o.map(([v,l])=>`<button class="choice ${ans[g][k]===v?'on':''}" data-k="${k}" data-v="${v}" aria-pressed="${ans[g][k]===v}">${l}</button>`).join('')}</div>`}
+function aromaticBlock(){const amap=st.tasting_type==='white'?whiteAromas:redAromas,a=ans[g];return`<div class="ttl">Maximal 3 Aromagruppen</div><div class="grid two aroma-grid">${Object.entries(amap).map(([v,l])=>`<button class="choice ${a.aromas.includes(v)?'on':''}" data-a="${v}" aria-pressed="${a.aromas.includes(v)}">${l}</button>`).join('')}</div><p class="small muted">${a.aromas.length}/3 gewählt</p>`}
+function slider(k,title,left,right,help=''){
+  const raw=ans[g][k],set=raw!==null&&raw!==undefined&&raw!=='';const v=set?Number(raw):3;
+  return`<div class="sliderfield"><div class="sliderhead"><b>${e(title)}</b><span class="slidervalue" id="sv_${k}">${set?v+'/5':'–/5'}</span></div>${help?`<p class="tiny muted" style="margin:5px 0 0">${e(help)}</p>`:''}<input class="${set?'':'unset'}" type="range" min="1" max="5" step="1" value="${v}" data-range="${k}" aria-label="${e(title)}"><div class="sliderends"><span>${e(left)}</span><span>${e(right)}</span></div></div>`
+}
+function simpleRedForm(){
+  return`<div class="simpleintro"><b>6 Regler, fertig.</b> Nicht nach einzelnen Früchten suchen – bewertet nur die Stärke der wichtigsten Merkmale.</div>
+  <div class="simplegroup"><div class="sectiontitle"><span>👃</span><div><b>Nase</b><small>kurz riechen, dann einstellen</small></div></div>
+  ${slider('nose_intensity','Duft- & Fruchtintensität','zurückhaltend','sehr intensiv')}
+  ${slider('oak','Würze & Röstung','kaum','sehr deutlich','Gewürze, Tabak, Kakao, Kaffee oder geröstetes Holz zusammenfassen.')}</div>
+  <div class="divider"></div><div class="simplegroup"><div class="sectiontitle"><span>👄</span><div><b>Gaumen</b><small>ein bis zwei Schlucke reichen</small></div></div>
+  ${slider('body','Körper & Fülle','schlank','sehr voll')}
+  ${slider('tannin','Tanningriff','weich','kräftig / griffig')}
+  ${slider('acidity','Frische & Säurespannung','weich / rund','sehr lebhaft')}</div>
+  <div class="divider"></div><div class="simplegroup"><div class="sectiontitle"><span>⏱️</span><div><b>Abgang</b><small>was bleibt nach dem Schlucken?</small></div></div>
+  ${slider('finish','Länge & Intensität','kurz','sehr lang')}</div>`;
+}
+function fullForm(){
+  if(st.tasting_type==='red_simple')return simpleRedForm();
+  const a=ans[g],white=st.tasting_type==='white';
+  const openNoseWhite=white?`<div class="subpanel"><div class="ttl">Sekundäre Eindrücke mit offener Nase</div><p class="small muted tight">Diese beiden Merkmale sind überwiegend aromatisch. Deshalb erst nach dem Öffnen der Nase beurteilen.</p><div class="ttl">Holz / Röstung</div>${pick('oak',[[1,'Kaum'],[2,'Dezent'],[3,'Deutlich']])}<div class="ttl">Stein / Kreide</div>${pick('mineral',[[1,'Kaum'],[2,'Mittel'],[3,'Deutlich']])}</div>`:'';
+  return`<div class="sectiontitle"><span>👃</span><div><b>Nase</b><small>erst ohne, dann mit Schwenken</small></div></div><div class="ttl">Ungeschwenkt: Intensität</div>${pick('nose_intensity',[[1,'Leise'],[2,'Mittel'],[3,'Intensiv']])}<div class="ttl">Nach dem Schwenken: geöffnet?</div>${pick('swirl_open',[[1,'Kaum'],[2,'Etwas'],[3,'Deutlich']])}${aromaticBlock()}
+<div class="divider"></div><div class="sectiontitle"><span>🤏</span><div><b>Gaumen · Nase zu</b><small>nur Grundgeschmack, Körper und Textur</small></div></div><div class="ttl">Säure${white?'wirkung':''}</div>${pick('acidity',white?[[1,'Mild'],[2,'Präsent'],[3,'Straff']]:[[1,'Niedrig'],[2,'Mittel'],[3,'Hoch']])}${white?'':`<div class="ttl">Tannin</div>${pick('tannin',[[1,'Weich'],[2,'Mittel'],[3,'Griffig']])}`}<div class="ttl">Körper</div>${pick('body',white?[[1,'Leicht'],[2,'Mittel'],[3,'Kräftig']]:[[1,'Mittel'],[2,'Voll'],[3,'Sehr voll']])}<div class="ttl">Textur</div><div class="grid two">${Object.entries(white?whiteTextures:redTextures).map(([v,l])=>`<button class="choice ${a.texture===v?'on':''}" data-x="${v}" aria-pressed="${a.texture===v}">${l}</button>`).join('')}</div>
+<div class="divider"></div><div class="sectiontitle"><span>💨</span><div><b>Nase öffnen</b><small>nach dem Schlucken durch die Nase ausatmen</small></div></div><div class="ttl">Retronasaler Aromaschub</div>${pick('retronasal',[[1,'Wenig'],[2,'Mittel'],[3,'Stark']])}${openNoseWhite}
+<div class="divider"></div><div class="sectiontitle"><span>⏱️</span><div><b>Abgang</b><small>was bleibt?</small></div></div><div class="ttl">Länge</div>${pick('finish',[[1,'Kurz'],[2,'Mittel'],[3,'Lang']])}<div class="field"><label>Eine Beobachtung <span class="muted small">(optional)</span></label><input id="note" maxlength="180" value="${e(a.note||'')}" placeholder="z. B. salzig, warm, überraschend weich …"></div>`;
+}
+function requiredFields(){
+  if(st.tasting_type==='red_simple')return['nose_intensity','oak','body','tannin','acidity','finish'];
+  return st.tasting_type==='white'?['nose_intensity','swirl_open','aromas','acidity','body','texture','oak','mineral','retronasal','finish']:['nose_intensity','swirl_open','aromas','acidity','tannin','body','texture','retronasal','finish'];
+}
+function filledCount(gl){const a=ans[gl];return requiredFields().reduce((n,k)=>n+(k==='aromas'?a.aromas.length>0:!!a[k]),0)}
+function complete(gl){return filledCount(gl)===requiredFields().length}
+function saveLabel(gl){const c=saveCtl[gl];if(c.error)return'Fehler';if(c.inFlight||c.pending)return'speichert…';return'gespeichert'}
+function taste(){
+  const both=complete(1)&&complete(2),total=requiredFields().length;
   A.innerHTML=brand(`<span class="room">${e(st.theme||R)}</span>`)+`<div class="toprow">${backLink()}<span class="savehint">Änderbar bis zur Profilfreigabe</span></div><div class="tabs"><button class="tab ${g===1?'on':''}" data-glass="1"><span>Wein 1</span><small>${filledCount(1)}/${total}${complete(1)?' ✓':''}</small></button><button class="tab ${g===2?'on':''}" data-glass="2"><span>Wein 2</span><small>${filledCount(2)}/${total}${complete(2)?' ✓':''}</small></button></div><section class="card tasting"><div class="pairtop"><div><div class="ey">${st.tasting_type==='white'?'🥂 Weißwein':st.tasting_type==='red_simple'?'⚡ Rotwein · kurz':'🍷 Rotwein'} · Wein ${g}</div><h2>Dein Eindruck</h2></div><span id="savestate" class="pill ${saveCtl[g].error?'warn':(!saveCtl[g].inFlight&&!saveCtl[g].pending?'done':'')}">${saveLabel(g)}</span></div><p class="muted small">Zwischen den Tabs wechseln, vergleichen und alles jederzeit korrigieren.</p>${fullForm()}</section><section class="card compact ${both?'ready':''}"><b>${both?'✓ Beide Bögen vollständig':'Noch nicht vollständig'}</b><p class="muted small">${both?'Alles ist gespeichert. Änderungen bleiben bis zur Freigabe möglich.':'Du musst nicht in einer festen Reihenfolge arbeiten.'}</p>${E?`<a class="btn secondary full center" href="${portalLink()}" data-nav="${portalLink()}">Zur Themenauswahl</a>`:''}</section>`;
   document.querySelectorAll('[data-glass]').forEach(z=>z.onclick=()=>{g=+z.dataset.glass;taste()});
-  if(st.tasting_type==='red_simple')wireSimpleSliders();else{
-    document.querySelectorAll('[data-k]').forEach(z=>z.onclick=()=>{ans[g][z.dataset.k]=+z.dataset.v;queueSave(g);taste()});
-    document.querySelectorAll('[data-a]').forEach(z=>z.onclick=()=>{const v=z.dataset.a,a=ans[g].aromas;a.includes(v)?ans[g].aromas=a.filter(x=>x!==v):a.length<3?ans[g].aromas=[...a,v]:toast('Maximal drei Aromen');queueSave(g);taste()});
-    document.querySelectorAll('[data-x]').forEach(z=>z.onclick=()=>{ans[g].texture=z.dataset.x;queueSave(g);taste()});
-  }
+  document.querySelectorAll('[data-k]').forEach(z=>z.onclick=()=>{ans[g][z.dataset.k]=+z.dataset.v;queueSave(g);taste()});
+  document.querySelectorAll('[data-a]').forEach(z=>z.onclick=()=>{const v=z.dataset.a,a=ans[g].aromas;a.includes(v)?ans[g].aromas=a.filter(x=>x!==v):a.length<3?ans[g].aromas=[...a,v]:toast('Maximal drei Aromen');queueSave(g);taste()});
+  document.querySelectorAll('[data-x]').forEach(z=>z.onclick=()=>{ans[g].texture=z.dataset.x;queueSave(g);taste()});
+  document.querySelectorAll('[data-range]').forEach(z=>{z.oninput=()=>{const b=document.getElementById('sv_'+z.dataset.range);if(b)b.textContent=z.value+'/5';z.classList.remove('unset')};z.onchange=()=>{ans[g][z.dataset.range]=+z.value;queueSave(g);taste()}});
+  const no=document.getElementById('note');if(no)no.oninput=x=>{ans[g].note=x.target.value;queueSave(g,650)};
 }
-function fullForm(){if(st.tasting_type==='red_simple')return simpleRedForm();return classicForm()}
-function classicForm(){const white=st.tasting_type==='white',am=white?whiteAromas:redAromas,tx=white?whiteTextures:redTextures;return`${sec('👃','Nase','Erster Eindruck und nach kurzem Schwenken')}${scale('nose_intensity','Intensität',['leise','mittel','intensiv'])}${scale('swirl_open','Nach Schwenken',['kaum','etwas','deutlich'])}<div class="ttl">Aromen · maximal 3</div><div class="grid aroma-grid">${Object.entries(am).map(([k,v])=>`<button class="choice ${ans[g].aromas.includes(k)?'on':''}" data-a="${k}">${v}</button>`).join('')}</div>${sec('👄','Gaumen',white?'Säure, Körper und Textur':'Säure, Tannin, Körper und Textur')}${scale('acidity','Säure',['niedrig','mittel','hoch'])}${white?'':scale('tannin','Tannin',['weich','mittel','griffig'])}${scale('body','Körper',['mittel','voll','sehr voll'])}<div class="ttl">Textur</div><div class="grid two">${Object.entries(tx).map(([k,v])=>`<button class="choice ${ans[g].texture===k?'on':''}" data-x="${k}">${v}</button>`).join('')}</div>${white?`${sec('🪨','Nachhall','Holz/Röstung, Mineralität und retronasale Aromatik')}${scale('oak','Holz/Röstung',['kaum','mittel','deutlich'])}${scale('mineral','Stein/Kreide',['kaum','mittel','deutlich'])}${scale('retronasal','Aromaschub',['wenig','mittel','stark'])}`:`${sec('👃','Retronasal','Nach dem Schlucken durch die Nase ausatmen')}${scale('retronasal','Aromaschub',['wenig','mittel','stark'])}`}${sec('⏳','Abgang','Was bleibt nach dem Schlucken?')}${scale('finish','Länge',['kurz','mittel','lang'])}`}
-function simpleRedForm(){return`<div class="simpleintro"><b>Kurzer Rotwein-Check.</b><br>Sechs Regler reichen. 1 bedeutet wenig/leicht, 5 bedeutet stark/ausgeprägt.</div><div class="simplegroup">${sec('👃','Nase','Gesamteindruck')}${slider('nose_intensity','Duft- & Fruchtintensität','zurückhaltend','sehr intensiv')}</div><div class="simplegroup">${sec('👄','Gaumen','Struktur und Stil')}${slider('oak','Würze & Röstung','kaum','deutlich')}${slider('body','Körper & Fülle','schlank','sehr voll')}${slider('tannin','Tanningriff','weich','kräftig')}${slider('acidity','Frische & Säurespannung','weich','sehr frisch')}</div><div class="simplegroup">${sec('⏳','Abgang','Nachhall')}${slider('finish','Länge & Intensität','kurz','sehr lang')}</div>`}
-function slider(k,label,left,right){const v=ans[g][k],display=v==null?'–':v;return`<div class="sliderfield"><div class="sliderhead"><b>${label}</b><span class="slidervalue">${display}/5</span></div><input class="${v==null?'unset':''}" type="range" min="1" max="5" step="1" value="${v==null?3:v}" data-slider="${k}" aria-label="${label}"><div class="sliderends"><span>1 · ${left}</span><span>5 · ${right}</span></div></div>`}
-function wireSimpleSliders(){document.querySelectorAll('[data-slider]').forEach(z=>{z.oninput=()=>{const k=z.dataset.slider;ans[g][k]=+z.value;const val=z.closest('.sliderfield').querySelector('.slidervalue');val.textContent=`${z.value}/5`;z.classList.remove('unset');queueSave(g)};z.onchange=()=>{queueSave(g);taste()}})}
-function sec(icon,title,sub){return`<div class="sectiontitle"><span>${icon}</span><div><b>${title}</b><small>${sub}</small></div></div>`}
-function scale(k,label,vals){return`<div class="ttl">${label}</div><div class="grid">${vals.map((x,i)=>`<button class="choice ${ans[g][k]===i+1?'on':''}" data-k="${k}" data-v="${i+1}">${x}</button>`).join('')}</div>`}
+function updateSaveDom(gl){if(g!==gl)return;const z=document.getElementById('savestate');if(!z)return;z.textContent=saveLabel(gl);z.className=`pill ${saveCtl[gl].error?'warn':(!saveCtl[gl].inFlight&&!saveCtl[gl].pending?'done':'')}`}
+function queueSave(gl,delay=300){const c=saveCtl[gl];ans[gl].client_revision=(Number(ans[gl].client_revision)||0)+1;clearTimeout(c.timer);c.pending=true;c.error=false;c.timer=setTimeout(()=>drainSave(gl),delay);updateSaveDom(gl)}
+async function drainSave(gl){
+  const c=saveCtl[gl];clearTimeout(c.timer);c.timer=null;
+  if(c.inFlight)return c.promise;
+  if(!c.pending)return;
+  c.pending=false;c.inFlight=true;c.error=false;updateSaveDom(gl);
+  const S=getSession(R),payload=JSON.parse(JSON.stringify(ans[gl]));
+  c.promise=rpcCompat('save_tasting_v2','save_tasting',{p_code:R,p_token:S.token,p_glass_no:gl,p_payload:payload})
+    .then(d=>{if(typeof d?.complete==='boolean')ans[gl].is_complete=d.complete;if(d?.client_revision!=null)ans[gl].client_revision=Math.max(Number(ans[gl].client_revision)||0,Number(d.client_revision)||0)})
+    .catch(x=>{c.error=true;toast(x.message)})
+    .finally(()=>{c.inFlight=false;c.promise=null;updateSaveDom(gl);if(c.pending)drainSave(gl)});
+  return c.promise;
+}
+async function flushAll(){for(const gl of [1,2]){const c=saveCtl[gl];if(c.timer){clearTimeout(c.timer);c.timer=null}if(c.pending)await drainSave(gl);if(c.inFlight&&c.promise)await c.promise;if(c.pending)await drainSave(gl)}}
+function keepaliveSave(gl){const c=saveCtl[gl],S=getSession(R);if(!R||!S||!c.pending||c.inFlight)return;const body=JSON.stringify({p_code:R,p_token:S.token,p_glass_no:gl,p_payload:ans[gl]});try{fetch(`${U}/rest/v1/rpc/save_tasting`,{method:'POST',headers:{'Content-Type':'application/json',apikey:K},body,keepalive:true})}catch{}}
 
+function pc(l,p){return`<section class="card"><div class="profile"><div class="ey">Profil ${l}</div><h3>Nase</h3><p>${e(p.nose)}</p><h3>Gaumen</h3><p>${e(p.palate)}</p>${p.finish?`<h3>Abgang</h3><p>${e(p.finish)}</p>`:''}${p.character?`<p class="character">${e(p.character)}</p>`:''}<div class="tags">${(p.key||[]).map(x=>`<span class="tag">${e(x)}</span>`).join('')}</div></div></section>`}
 async function profiles(){
-  const S=getSession(R);await flushAll();let d;try{d=await rpcCompat('get_profiles_v2','get_profiles',{p_code:R,p_token:S.token})}catch(x){xRoom(x.message);return}
-  if(!d.profile_a||!d.profile_b){A.innerHTML=brand()+`<section class="card wait"><div class="dots">•••</div><h2>Noch nicht freigegeben</h2><p class="muted">Der Host öffnet gleich die Profile.</p></section>`;poll=setTimeout(roomBoot,4000);return}
-  A.innerHTML=brand(`<span class="room">${e(st.theme||R)}</span>`)+`<div class="toprow">${backLink()}</div><section class="card hero"><div class="ey">Jetzt vergleichen</div><h2>Welches Profil gehört zu welchem Wein?</h2><p class="muted">Lies A und B erst jetzt. Deine freie Verkostung bleibt unverändert.</p></section>${profileCard('A',d.profile_a)}${profileCard('B',d.profile_b)}<section class="card" id="guess"><h3>Deine Zuordnung</h3>${guessRow('ga','Profil A ist',[1,'Wein 1'],[2,'Wein 2'])}${guessRow('co','Sicherheit',[50,'50 %'],[70,'70 %'],[90,'90 %'])}${guessRow('fa','Lieblingswein',[1,'Wein 1'],[2,'Wein 2'])}${guessRow('pr','Vermutlich teurer',[1,'Wein 1'],[2,'Wein 2'])}<button id="send" class="btn primary full">Zuordnung abgeben</button></section>`;
+  clearPoll();await flushAll();const S=getSession(R),p=await rpc('get_profiles',{p_code:R,p_token:S.token});st=await rpc('get_public_state',{p_code:R,p_token:S.token});if(st.me.guess_submitted)return waitReveal();
+  A.innerHTML=brand(`<span class="room">${e(st.theme)}</span>`)+`<div class="toprow">${backLink()}</div><section class="card hero"><div class="ey">Runde 2</div><h2>Welches Profil passt zu welchem Wein?</h2><p class="muted">Die Flaschennamen bleiben weiter verborgen.</p></section>${pc('A',p.A)}${pc('B',p.B)}<section class="card" id="guess"><h3>Deine Zuordnung</h3>${guessBlock('Profil A gehört zu','ga',[[1,'Wein 1'],[2,'Wein 2']])}${guessBlock('Sicherheit','co',[[50,'50%'],[70,'70%'],[90,'90%']])}${guessBlock('Welchen trinkst du lieber?','fa',[[1,'Wein 1'],[2,'Wein 2']])}${guessBlock('Welchen hältst du für teurer?','pr',[[1,'Wein 1'],[2,'Wein 2']])}<button id="send" class="btn primary full">Zuordnung abgeben</button></section>`;
   const z={};document.querySelectorAll('#guess [data-t]').forEach(x=>x.onclick=()=>{z[x.dataset.t]=+x.dataset.v;x.parentElement.querySelectorAll('.choice').forEach(y=>y.classList.remove('on'));x.classList.add('on')});
-  document.getElementById('send').onclick=async()=>{if(!z.ga||!z.co||!z.fa||!z.pr)return toast('Bitte alles auswählen');await rpc('save_guess',{p_code:R,p_token:S.token,p_profile_a_glass:z.ga,p_confidence:z.co,p_favorite_glass:z.fa,p_pricier_glass:z.pr});roomBoot()};
+  send.onclick=async()=>{if(!z.ga||!z.co||!z.fa||!z.pr)return toast('Bitte alles auswählen');await rpc('save_guess',{p_code:R,p_token:S.token,p_profile_a_glass:z.ga,p_confidence:z.co,p_favorite_glass:z.fa,p_pricier_glass:z.pr});roomBoot()};
 }
-function profileCard(letter,p){return`<section class="card profile"><div class="ey">Profil ${letter}</div><h3>Nase / Aromatik</h3><p>${e(p.nose||'')}</p><h3>Gaumen</h3><p>${e(p.palate||'')}</p>${p.finish?`<h3>Abgang</h3><p>${e(p.finish)}</p>`:''}<div class="character">${e(p.character||'')}</div></section>`}
-function guessRow(k,label,...opts){return`<div class="ttl">${label}</div><div class="grid ${opts.length===2?'two':''}">${opts.map(o=>`<button class="choice" data-t="${k}" data-v="${o[0]}">${o[1]}</button>`).join('')}</div>`}
+function guessBlock(t,k,o){return`<div class="ttl">${t}</div><div class="grid ${o.length===2?'two':''}">${o.map(([v,l])=>`<button class="choice" data-t="${k}" data-v="${v}">${l}</button>`).join('')}</div>`}
+async function waitReveal(){const S=getSession(R);st=await rpc('get_public_state',{p_code:R,p_token:S.token});A.innerHTML=brand(`<span class="room">${e(st.theme)}</span>`)+`<section class="card wait"><div class="dots">•••</div><h2>Zuordnung gespeichert</h2><p class="muted">Jetzt fehlt nur noch die Auflösung.</p>${stats(st)}${E?`<a class="btn secondary full center" href="${portalLink()}" data-nav="${portalLink()}">Andere Tastings</a>`:''}</section>`;poll=setInterval(async()=>{const x=await rpc('get_public_state',{p_code:R,p_token:S.token});if(x.phase==='revealed')roomBoot()},4000)}
+function stats(x){return`<div class="stats"><div class="stat"><b>${x.participant_count}</b>Teilnehmer</div><div class="stat"><b>${x.tasting_done}</b>fertig</div><div class="stat"><b>${x.guesses_done}</b>zugeordnet</div></div>`}
 
-async function revealed(){
+async function reveal(){
   clearPoll();const S=getSession(R),r=await rpcCompat('get_reveal_v2','get_reveal',{p_code:R,p_token:S.token});cacheReveal(R,r,st?.theme||r.theme);const me=r.leaderboard.find(x=>String(x.name).toLowerCase()===String(S.name).toLowerCase()),bglass=r.profile_a_glass===1?2:1;
   const d=E?await rpc('get_event_state',{p_event_code:E}).catch(()=>null):null;
   const history=d?await loadEventLeaderboard(d):[cachedReveal(R)].filter(Boolean);
   A.innerHTML=brand(`<span class="room">${e(r.theme||R)}</span>`)+`<div class="toprow">${backLink()}</div><section class="card hero revealhero"><div class="ey">Auflösung</div><h2>${me?`${e(me.name)}: ${me.score}/${me.max_score} Punkte`:'Die Weine sind enthüllt'}</h2><p class="muted">Profil A war Wein ${r.profile_a_glass}; Profil B war Wein ${bglass}.</p>${me?personalBreakdown(me):''}</section><section class="card"><h3>Die Flaschen</h3><div class="wines">${wine(1,r.glass1)}${wine(2,r.glass2)}</div></section>${groupResult(r)}<section class="card"><h3>Leaderboard dieses Paars</h3>${roomRanks(r.leaderboard)}<p class="small muted">Maximal 46 Punkte. Struktur und Zuordnung zählen stärker als einzelne Aromawörter.</p></section>${eventLeaderboard(history,'Leaderboard über den Abend')}`;
 }
-function wine(n,w){return`<div class="wine"><div class="ey">Wein ${n}</div><b>${e(w?.display_name||'')}</b><p class="small muted">${e(w?.vintage||'')} · ${e(w?.price_band_eur||'')}</p></div>`}
-function personalBreakdown(me){const b=me.breakdown||{};const rows=[['Nase',b.nose],['Aromatik',b.aromas],['Struktur',b.structure],['Abgang',b.finish],['A/B',b.profile]];return`<div class="scorebreak">${rows.map(([l,v])=>{const x=Number(v?.score??v??0),m=Number(v?.max??0),pct=m?x/m*100:0;return`<div><div class="barlabel"><span>${l}</span><b>${fmt(x)}${m?`/${fmt(m)}`:''}</b></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}).join('')}</div>`}
-function roomRanks(lb){return(lb||[]).map((x,i)=>`<div class="rank"><div class="n">${i+1}</div><div><b>${e(x.name)}</b><div class="small muted">${x.profile_correct?'Profil ✓':'Profil ✕'}</div></div><div class="score">${fmt(x.score)}</div></div>`).join('')||'<p class="muted">Noch keine Ergebnisse.</p>'}
+function wine(n,w){return`<div class="wine"><div class="ey">Wein ${n}</div><b>${e(w.name)} ${e(w.vintage||'')}</b><p class="small muted">${e(w.details?.price_band_eur||'')}</p><p class="tiny muted">${e(w.details?.sources_summary||'')}</p></div>`}
+function personalBreakdown(me){const b=me.breakdown;if(b){const av=(Number(b.aromatik??b.nose)||0)+(b.aromatik!=null?0:(Number(b.aromas)||0)),am=(Number(b.aromatik_max??b.nose_max)||0)+(b.aromatik_max!=null?0:(Number(b.aromas_max)||0));const sv=Number(b.struktur??b.structure)||0,sm=Number(b.struktur_max??b.structure_max)||0;const fv=Number(b.abgang??b.finish)||0,fm=Number(b.abgang_max??b.finish_max)||0;const zv=Number(b.zuordnung??b.assignment)||0,zm=Number(b.zuordnung_max??b.assignment_max)||0;return`<div class="scorebreak four"><div>${scoreBar('Aromatik',av,am)}</div><div>${scoreBar('Struktur',sv,sm)}</div><div>${scoreBar('Abgang',fv,fm)}</div><div>${scoreBar('Zuordnung',zv,zm)}</div></div>`}const total=Number(me.score)||0,profile=me.profile_correct?8:0,sens=Math.max(0,total-profile);return`<div class="scorebreak"><div>${scoreBar('Sensorik',sens,38)}</div><div>${scoreBar('Profilzuordnung',profile,8)}</div></div>`}
+
+function scoreBar(label,value,max){const pct=max?Math.max(0,Math.min(100,value/max*100)):0;return`<div class="barlabel"><span>${e(label)}</span><b>${fmt(value)}/${fmt(max)}</b></div><div class="bar"><i style="width:${pct}%"></i></div>`}
+function roomRanks(lb){return(lb||[]).map((x,i)=>{const pct=Math.max(0,Math.min(100,(Number(x.score)||0)/(Number(x.max_score)||46)*100));return`<div class="rank"><div class="n">${i+1}</div><div><b>${e(x.name)}</b><div class="small muted">Profil ${x.profile_correct?'✓':'✗'} · ${x.confidence||'–'}%</div><div class="minibar"><i style="width:${pct}%"></i></div></div><div class="score">${fmt(x.score)}</div></div>`}).join('')}
 function groupResult(r){
   const total=(r.leaderboard||[]).length,amap=r.tasting_type==='white'?whiteAromas:redAromas;
   const fav=votes(r.leaderboard,'favorite_glass'),price=votes(r.leaderboard,'pricier_glass'),correct=(r.leaderboard||[]).filter(x=>x.profile_correct).length;
@@ -187,36 +232,6 @@ function glassAverages(r){
 }
 function avgRow(label,a,b,max=3){const av=Number(a)||0,bv=Number(b)||0;return`<div class="avgrow"><b>${e(label)}</b><span><i style="width:${av/max*100}%"></i><em>1 · ${av?av.toFixed(1):'–'}</em></span><span><i style="width:${bv/max*100}%"></i><em>2 · ${bv?bv.toFixed(1):'–'}</em></span></div>`}
 
-async function loadEventLeaderboard(eventState){
-  if(E){
-    try{
-      const shared=await rpc('get_event_leaderboard',{p_event_code:E});
-      if(shared?.people?.length)return shared;
-    }catch{}
-  }
-  return loadEventHistory(eventState);
-}
-async function loadEventHistory(eventState){
-  const out=[];
-  for(const room of eventState?.rooms||[]){
-    if(room.phase!=='revealed')continue;
-    let snap=null;
-    const S=getSession(room.code);
-    if(S?.token){
-      try{
-        const r=await rpcCompat('get_reveal_v2','get_reveal',{p_code:room.code,p_token:S.token});
-        cacheReveal(room.code,r,room.theme);
-        snap=cachedReveal(room.code);
-      }catch{snap=cachedReveal(room.code)}
-    }else snap=cachedReveal(room.code);
-    if(snap){
-      snap.theme=room.theme||snap.theme;
-      snap.sort_order=room.sort_order||out.length;
-      out.push(snap);
-    }
-  }
-  return out;
-}
 function aggregateHistory(history){
   const rooms=history.filter(Boolean),names=new Map();
   rooms.forEach(r=>(r.leaderboard||[]).forEach(x=>{const k=String(x.name).trim().toLowerCase();if(!names.has(k))names.set(k,{name:x.name})}));
@@ -247,9 +262,9 @@ function fmt(n){const v=Number(n)||0;return Number.isInteger(v)?String(v):v.toFi
 async function hostPortal(){
   clearPoll();if(!H){A.innerHTML=brand()+`<section class="card"><h2>Host-Sitzung abgelaufen</h2><p class="muted">Öffne den ursprünglichen Host-Link erneut.</p></section>`;return}
   let h;try{h=await rpc('host_get_event_state',{p_event_code:E,p_host_token:H})}catch{A.innerHTML=brand()+`<section class="card"><h2>Host-Link ungültig</h2></section>`;return}
-  const link=`${location.origin}${location.pathname}?event=${encodeURIComponent(E)}&kiosk=1`,publicState=await rpc('get_event_state',{p_event_code:E}).catch(()=>null),history=publicState?await loadEventLeaderboard(publicState):[];
-  A.innerHTML=brand(`<span class="room">Host</span>`)+`<section class="card hero"><div class="ey">Steuerung</div><h2>${e(h.title)}</h2><div class="field"><label>Einladungslink</label><input id="inv" readonly value="${e(link)}"></div><button id="copy" class="btn secondary full">Link kopieren</button><a class="linkbtn hostexit" href="?event=${encodeURIComponent(E)}&kiosk=1">📱 Kiosk / Teilnehmeransicht</a></section><div class="pairlist">${h.rooms.map(hostCard).join('')}</div>${eventLeaderboard(history,'Aktueller Gesamtstand')}`;
-  document.getElementById('copy').onclick=()=>navigator.clipboard.writeText(link).then(()=>toast('Link kopiert'));
+  const link=navTarget(`?event=${encodeURIComponent(E)}&kiosk=1`),publicState=await rpc('get_event_state',{p_event_code:E}).catch(()=>null),history=publicState?await loadEventLeaderboard(publicState):[];
+  A.innerHTML=brand(`<span class="room">Host</span>`)+`<section class="card hero"><div class="ey">Steuerung</div><h2>${e(h.title)}</h2><div class="field"><label>Einladungslink</label><input id="inv" readonly value="${e(link)}"></div><button id="copy" class="btn secondary full">Link kopieren</button><a class="linkbtn hostexit" href="${navTarget(`?event=${encodeURIComponent(E)}&kiosk=1`)}">📱 Kiosk / Teilnehmeransicht</a></section><div class="pairlist">${h.rooms.map(hostCard).join('')}</div>${eventLeaderboard(history,'Aktueller Gesamtstand')}`;
+  copy.onclick=()=>navigator.clipboard.writeText(link).then(()=>toast('Link kopiert'));
   document.querySelectorAll('[data-phase]').forEach(x=>x.onclick=async()=>{const phase=x.dataset.phase,room=x.dataset.room,msg=phase==='profiles'?'Profile für dieses Paar freigeben?':'Dieses Paar jetzt endgültig auflösen?';if(confirm(msg)){try{await rpcCompat('host_set_room_phase_v2','host_set_room_phase',{p_event_code:E,p_host_token:H,p_room_code:room,p_phase:phase});hostPortal()}catch(z){toast(z.message)}}});
   document.querySelectorAll('[data-reset]').forEach(x=>x.onclick=async()=>{if(confirm('Alle Teilnehmer und Antworten dieses Paars löschen und neu starten?')){await rpcCompat('host_reset_room_v2','host_reset_room',{p_event_code:E,p_host_token:H,p_room_code:x.dataset.reset});localStorage.removeItem(historyKey(x.dataset.reset));hostPortal()}});
   poll=setTimeout(hostPortal,7000);
