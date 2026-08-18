@@ -7,22 +7,37 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch current wine app
+      - name: Build static wine app
         run: |
-          curl -fsSL 'https://ttympdkjbtuspmroasae.supabase.co/functions/v1/wine-night-gh?event=BURGUND' -o wine-night.html
-          test -s wine-night.html
-          head -c 20 wine-night.html
+          mkdir -p site
+          curl -fsSL 'https://ttympdkjbtuspmroasae.supabase.co/functions/v1/wine-night-gh?event=BURGUND' -o site/index.html
+          test -s site/index.html
+          grep -qi '<!doctype html' site/index.html
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
 
-      - name: Publish public link
-        run: |
-          PUBLIC_URL=$(curl -fsS -X POST 'https://hurl.page/deploy?ttl=604800' \
-            -H 'Content-Type: text/html' \
-            --data-binary @wine-night.html)
-          echo "PUBLIC_URL=$PUBLIC_URL"
-          echo "## Mitspieler-Link" >> "$GITHUB_STEP_SUMMARY"
-          echo "$PUBLIC_URL" >> "$GITHUB_STEP_SUMMARY"
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
