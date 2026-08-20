@@ -239,7 +239,39 @@ async function newCtx(browser) {
   ok('Interne Aroma-IDs bleiben in der Aufloesung verborgen', !revealText.includes('zitrus_grapefruit'));
   await ctx.close();
 
-  // ---------- 12. Assets werden korrekt ausgeliefert ----------
+  // ---------- 12. OLIRED hat wieder antippbare Sensorik-Hilfen ----------
+  ctx = await newCtx(browser);
+  page = await ctx.newPage();
+  await page.addInitScript(() => {
+    localStorage.setItem('wt_app_version', 'stable-kiosk-20260818-1');
+    localStorage.setItem('wt_portal_name_BURGUND', 'Olli');
+    localStorage.setItem('wt_OLIRED', JSON.stringify({ name: 'Olli', token: 'olired-help-probe-token' }));
+  });
+  await page.route('**/rest/v1/rpc/get_public_state', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({
+      room_code: 'OLIRED', theme: 'Ollis rote Weine', tasting_type: 'red_simple',
+      phase: 'tasting', me: { name: 'Olli', guess_submitted: false }, all_active_names: ['Olli'],
+    }),
+  }));
+  await page.route('**/rest/v1/rpc/get_my_answers', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: '[]',
+  }));
+  await page.goto(`${BASE}/?event=BURGUND&room=OLIRED`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  ok('OLIRED zeigt Hilfen fuer alle sieben Regler plus Aromen', await page.locator('details.sensorytip').count() === 8);
+  ok('Tanningriff-Hilfe ist direkt am richtigen Regler', await page.locator('[data-sensory-tip="tannin"]').count() === 1);
+  await page.locator('[data-sensory-tip="tannin"] summary').click();
+  ok('Tanningriff-Hilfe laesst sich per Tap oeffnen', await page.locator('[data-sensory-tip="tannin"]').getAttribute('open') !== null);
+  const tanninTip = await page.locator('[data-sensory-tip="tannin"] p').textContent();
+  ok('Tanningriff wird sensorisch erklaert', /Zunge, Zahnfleisch und Wangen/.test(tanninTip), tanninTip);
+  const aromaTip = await page.locator('[data-sensory-tip="aromas"] p').textContent();
+  ok('Aromahilfe erklaert Familien statt exakter Fruchtrate', /grobe Familien/.test(aromaTip), aromaTip);
+  const retroTip = await page.locator('[data-sensory-tip="retronasal"] p').textContent();
+  ok('Postnasaler Regler hat eine eigene Hilfe', /Nase zu und Nase offen/.test(retroTip), retroTip);
+  await ctx.close();
+
+  // ---------- 13. Assets werden korrekt ausgeliefert ----------
   ctx = await newCtx(browser);
   page = await ctx.newPage();
   const assets = [

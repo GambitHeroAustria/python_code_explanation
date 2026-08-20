@@ -24,3 +24,13 @@
 /* Postnasal-Anleitung (nur OLIRED-Bewertungsblock) */
 .postnasalguide{display:block;margin:12px 0 6px}
 .postnasalguide img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid #e3d0bd;background:#fdf8f2}
+
+/* Antippbare Sensorik-Hilfen im kompakten Rotweinbogen. */
+.sensorytip{margin:8px 0 14px;border:1px solid #e4d6d1;border-radius:11px;background:#faf6f2;overflow:hidden}
+.sensorytip summary{list-style:none;padding:9px 11px;color:var(--w);font-size:.8rem;font-weight:850;cursor:pointer;min-height:40px;display:flex;align-items:center}
+.sensorytip summary::-webkit-details-marker{display:none}
+.sensorytip summary:after{content:'+';margin-left:auto;font-size:1.05rem}
+.sensorytip[open] summary:after{content:'−'}
+.sensorytip p{margin:0;padding:0 11px 11px;color:var(--m);font-size:.8rem;line-height:1.48}
+.sensorytip[open]{background:#fffaf6;border-color:#ceb9b1}
+.sensorytip summary:focus-visible{outline:3px solid #65182f26;outline-offset:-3px}
