@@ -37,6 +37,13 @@ Abend-Leaderboard und Punkteverlauf dieselbe Funktion
 `private.event_round_scores`; ein abweichender zweiter Rechenweg existiert
 nicht.
 
+Axel ist zusaetzlich als Mitspieler-Host autorisiert. Sobald auf seinem Geraet
+mindestens eine bestehende Axel-Teilnehmersitzung liegt, erscheint im normalen
+Portal ein drittes Tab `Host`. Die drei `participant_host_*`-RPCs pruefen diese
+Sitzung gegen `event_host_participants` und delegieren anschliessend an dieselbe
+Host-Logik. Der eigentliche Event-Host-Token bleibt dabei ausschliesslich in
+Supabase.
+
 ## Sicherheitsregeln
 
 - Kein Host-Token in Client, Git, Logs, Handover oder Deployment.
