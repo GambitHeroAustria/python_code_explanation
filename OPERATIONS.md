@@ -44,6 +44,14 @@ Sitzung gegen `event_host_participants` und delegieren anschliessend an dieselbe
 Host-Logik. Der eigentliche Event-Host-Token bleibt dabei ausschliesslich in
 Supabase.
 
+Bei Solo-Raeumen ist `private.solo_guess_options` die verbindliche Quelle fuer
+die sichtbaren Quizoptionen, die serverseitige Validierung und die spaeter als
+richtig gezeigten Antworten. `solo_get_reveal_v2` liefert nach der Freigabe die
+vollstaendige Detailauswertung aller Teilnehmer: acht qualitative Werte samt
+Zielwert und Teilpunkten, Aroma-Treffer/Fehlstellen/Zusatzwahl sowie jede
+Quizantwort mit richtig/falsch und Punktanteil. Die Summen werden gegen dieselbe
+serverseitige Rundenwertung geprueft, die Leaderboard und Timeline speist.
+
 ## Sicherheitsregeln
 
 - Kein Host-Token in Client, Git, Logs, Handover oder Deployment.
