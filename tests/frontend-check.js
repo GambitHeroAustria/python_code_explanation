@@ -12,8 +12,8 @@
 // CHROMIUM_TLS_MAX gesetzt werden. In GitHub Actions nutzt Playwright seine
 // normal installierte Chromium-Version ohne Proxy-Sonderfall.
 //
-// Der Test betritt bewusst KEINEN Verkostungsraum: das wuerde ueber
-// join_tasting echte Teilnehmerdaten schreiben.
+// Der Test schreibt keine Teilnehmerdaten. Raumansichten mit Test-Tokens
+// werden vollstaendig ueber lokale Route-Mocks bedient.
 const { chromium } = require('playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8123';
 const SHARE = process.env.SHARE || '';
@@ -179,7 +179,67 @@ async function newCtx(browser) {
   ok('Axels Teilnehmer-Token wird an die Autorisierungspruefung uebergeben', participantHostPayload?.p_participant_tokens?.includes('browser-probe-token'), JSON.stringify(participantHostPayload));
   await ctx.close();
 
-  // ---------- 11. Assets werden korrekt ausgeliefert ----------
+  // ---------- 11. Solo-Aufloesung zeigt wieder alle Detailwerte ----------
+  ctx = await newCtx(browser);
+  page = await ctx.newPage();
+  let revealV2Called = false;
+  await page.addInitScript(() => {
+    localStorage.setItem('wt_app_version', 'stable-kiosk-20260818-1');
+    localStorage.setItem('wt_portal_name_BURGUND', 'Axel');
+    localStorage.setItem('wt_SOLOW1', JSON.stringify({ name: 'Axel', token: 'reveal-probe-token' }));
+  });
+  await page.route('**/rest/v1/rpc/get_public_state', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ tasting_type: 'white_solo', me: { name: 'Axel' } }),
+  }));
+  await page.route('**/rest/v1/rpc/solo_get_state', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ room_code: 'SOLOW1', theme: 'Weiß einzeln 1', phase: 'revealed', me: { name: 'Axel' } }),
+  }));
+  await page.route('**/rest/v1/rpc/solo_get_reveal_v2', route => {
+    revealV2Called = true;
+    return route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({
+        wine: { name: 'Sancerre „Enclos de Maimbray“', vintage: 2022, details: { summary: '100 % Sauvignon Blanc · Loire', region: 'Sancerre, Loire', grapes: '100% Sauvignon Blanc', serve: '10–12 °C' } },
+        correct_guesses: { grape: 'Sauvignon Blanc', region: 'Loire', price: '20–30 €' },
+        quiz_options: { grape: ['Sauvignon Blanc', 'Chardonnay'], region: ['Loire', 'Burgund'], price: ['10–20 €', '20–30 €'] },
+        leaderboard: [{ name: 'Axel', score: 14.5, max_score: 27 }, { name: 'Anja', score: 15, max_score: 27 }],
+        players: [{
+          name: 'Axel', score: 14.5, max_score: 27,
+          breakdown: { metrics: 7.5, metrics_max: 16, aromas: 2, aromas_max: 3, quiz: 5, quiz_max: 8 },
+          guesses: [
+            { key: 'grape', selected: 'Sauvignon Blanc', expected: 'Sauvignon Blanc', correct: true, score: 3, max: 3 },
+            { key: 'region', selected: 'Südwestfrankreich', expected: 'Loire', correct: false, score: 0, max: 3 },
+            { key: 'price', selected: '20–30 €', expected: '20–30 €', correct: true, score: 2, max: 2 },
+          ],
+          metrics: [
+            { key: 'nose_intensity', value: 5, target: 4, score: 1, max: 2 },
+            { key: 'freshness', value: 5, target: 4, score: 0.5, max: 1 },
+          ],
+          aromas: { score: 2, max: 3, matched: ['zitrus_grapefruit'], missed: ['kraeuter_gras'], extra: ['honig_vanille'] },
+        }, {
+          name: 'Anja', score: 15, max_score: 27,
+          breakdown: { metrics: 10, metrics_max: 16, aromas: 2, aromas_max: 3, quiz: 3, quiz_max: 8 },
+          guesses: [], metrics: [], aromas: { score: 2, max: 3, matched: [], missed: [], extra: [] },
+        }],
+      }),
+    });
+  });
+  await page.goto(`${BASE}/?event=BURGUND&room=SOLOW1`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1000);
+  const revealText = await page.textContent('#app');
+  ok('Solo-Aufloesung nutzt den detaillierten v2-RPC', revealV2Called);
+  ok('Richtige Quizantworten werden explizit gezeigt', revealText.includes('Richtige Schätzantworten') && revealText.includes('Loire'));
+  ok('Aufloesung bestaetigt die gemeinsame Optionsquelle', revealText.includes('war auswählbar'));
+  ok('Alle Mitspieler erscheinen in der Detailauswertung', revealText.includes('Axel') && revealText.includes('Anja'));
+  ok('Qualitative Ist- und Zielwerte werden verglichen', revealText.includes('Wert 5 · Ziel 4'));
+  ok('Falsche Tipps zeigen die richtige Antwort', revealText.includes('Richtig: Loire'));
+  ok('Aromentreffer werden mit sichtbaren Labels dargestellt', revealText.includes('Zitrone & Grapefruit') && revealText.includes('Kräuter & frisches Gras'));
+  ok('Interne Aroma-IDs bleiben in der Aufloesung verborgen', !revealText.includes('zitrus_grapefruit'));
+  await ctx.close();
+
+  // ---------- 12. Assets werden korrekt ausgeliefert ----------
   ctx = await newCtx(browser);
   page = await ctx.newPage();
   const assets = [
