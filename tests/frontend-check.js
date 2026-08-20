@@ -156,7 +156,7 @@ async function newCtx(browser) {
     body: JSON.stringify({
       title: 'Weinabend – Blindverkostungen',
       rooms: [{
-        code: 'SOLOW1', theme: 'Weißwein · Sancerre', tasting_type: 'white_solo',
+        code: 'SOLOW1', theme: 'Weiß einzeln 1', tasting_type: 'white_solo',
         phase: 'tasting', participants: 3, tasting_done: 3, guesses_done: 3,
       }],
     }),
@@ -170,6 +170,8 @@ async function newCtx(browser) {
   await page.waitForTimeout(1200);
   ok('Axel sieht ein eigenes Host-Tab', await page.isVisible('.eventtabs a:has-text("Host")'));
   ok('Axels Host-Tab laedt die Rundensteuerung', (await page.textContent('#app')).includes('Runden freigeben'));
+  ok('Host verwendet denselben Weinnamen wie das Tasting', (await page.textContent('#app')).includes('Sancerre „Enclos de Maimbray“ 2022'));
+  ok('Interner Raumtitel bleibt im Host verborgen', !(await page.textContent('#app')).includes('Weiß einzeln 1'));
   ok('Sancerre-Aufloesung ist bei 3/3 freigeschaltet', await page.isEnabled('[data-player-host-phase="revealed"][data-room="SOLOW1"]'));
   await page.click('[data-player-host-phase="revealed"][data-room="SOLOW1"]');
   await page.waitForTimeout(700);
