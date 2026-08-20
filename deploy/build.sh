@@ -5,7 +5,7 @@
 #
 # Die portable Validierung und der SHA-256-Vergleich laufen beide im Build.
 set -euo pipefail
-SHA=974f270933e63b547bc14023b5c740535deed738
+SHA=1188896cca6ea5ba4b72f6921815953a722d2ca4
 REPO=GambitHeroAustria/python_code_explanation
 
 rm -rf src public
