@@ -271,7 +271,37 @@ async function newCtx(browser) {
   ok('Postnasaler Regler hat eine eigene Hilfe', /Nase zu und Nase offen/.test(retroTip), retroTip);
   await ctx.close();
 
-  // ---------- 13. Assets werden korrekt ausgeliefert ----------
+  // ---------- 13. Experten-Auszeichnungen im Abendstand ----------
+  ctx = await newCtx(browser);
+  page = await ctx.newPage();
+  await page.addInitScript(() => {
+    localStorage.setItem('wt_app_version', 'stable-kiosk-20260818-1');
+    localStorage.setItem('wt_portal_name_BURGUND', 'Axel');
+  });
+  await page.route('**/rest/v1/rpc/get_event_state', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ title: 'Weinabend', rooms: [] }),
+  }));
+  await page.route('**/rest/v1/rpc/get_event_overview', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({
+      title: 'Weinabend', rooms: [], timeline: { round_count: 4, players: [], rounds: [] },
+      expert_awards: [
+        { kind: 'aroma', icon: '🍇', label: 'Aroma-Experte', name: 'Oliver', accuracy: 66, samples: 6 },
+        { kind: 'tannin', icon: '🍷', label: 'Tannin-Experte', name: 'Oliver', accuracy: 88, samples: 4 },
+        { kind: 'nasal', icon: '👃', label: 'Nasal-Experte', name: 'Axel', accuracy: 69, samples: 6 },
+      ],
+    }),
+  }));
+  await page.goto(`${BASE}/?event=BURGUND&tab=stand`, { waitUntil: 'networkidle' });
+  const expertText = await page.textContent('#app');
+  ok('Abendstand zeigt alle drei Expertenkategorien', /Aroma-Experte/.test(expertText) && /Tannin-Experte/.test(expertText) && /Nasal-Experte/.test(expertText));
+  ok('Expertennamen werden veroeffentlicht', /Aroma-Experte\s*Oliver/.test(expertText) && /Nasal-Experte\s*Axel/.test(expertText), expertText.slice(0, 500));
+  ok('Trefferquote und Zahl der Wertungen sind sichtbar', expertText.includes('88 % · 4 Wertungen'));
+  ok('Laufende Runden sind erklaert und ausgeschlossen', expertText.includes('Laufende Runden zählen erst nach der Auflösung'));
+  await ctx.close();
+
+  // ---------- 14. Assets werden korrekt ausgeliefert ----------
   ctx = await newCtx(browser);
   page = await ctx.newPage();
   const assets = [
