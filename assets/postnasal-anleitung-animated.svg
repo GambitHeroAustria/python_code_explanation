@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" role="img" aria-labelledby="pn-title pn-desc">
+  <title id="pn-title">Anleitung: Postnasale Geschmacksexplosion</title>
+  <desc id="pn-desc">Selbstlaufende Schleife in fünf Schritten: Erstens die Nase sanft mit zwei Fingern zuhalten. Zweitens mit geschlossener Nase einen kleinen Schluck nehmen. Drittens schlucken und das Glas kurz absetzen. Viertens die Nase öffnen und ruhig durch die Nase ausatmen. Fünftens erneut am Glas riechen und den Unterschied vergleichen.</desc>
+  <style>
+    text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+    .scene{opacity:0;animation:pnsc 12s linear infinite}
+    .s1{opacity:1;animation-name:pnsc1}
+    .s2{animation-delay:2.4s}.s3{animation-delay:4.8s}.s4{animation-delay:7.2s}.s5{animation-delay:9.6s}
+    @keyframes pnsc{0%{opacity:0}2.5%{opacity:1}18%{opacity:1}20.5%{opacity:0}100%{opacity:0}}
+    @keyframes pnsc1{0%{opacity:1}18%{opacity:1}20.5%{opacity:0}97.5%{opacity:0}100%{opacity:1}}
+    .breath{stroke-dasharray:7 8;animation:pnflow 1.6s linear infinite}
+    @keyframes pnflow{to{stroke-dashoffset:-30}}
+    @media (prefers-reduced-motion: reduce){
+      .scene,.breath{animation:none}
+      .s1{opacity:1}
+    }
+  </style>
+  <rect width="760" height="470" fill="#fdf8f2"/>
+  <text x="34" y="46" font-size="17" font-weight="800" letter-spacing="1.6" fill="#65182f">POSTNASALE GESCHMACKSEXPLOSION · SO GEHT'S</text>
+  <g fill="#e3d3c8">
+    <circle cx="620" cy="40" r="7"/><circle cx="646" cy="40" r="7"/><circle cx="672" cy="40" r="7"/><circle cx="698" cy="40" r="7"/><circle cx="724" cy="40" r="7"/>
+  </g>
+  <defs>
+    <g id="pn-face">
+      <path d="M118 84 Q66 96 58 158 Q52 212 84 248 Q104 270 100 296 L150 296 Q196 292 210 258 Q218 240 214 222 L236 214 Q244 210 238 202 L216 176 Q216 118 178 94 Q150 78 118 84 Z" fill="#f7e9df" stroke="#451020" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="160" cy="152" r="7" fill="#451020"/>
+      <path d="M196 250 q14 4 26 0" stroke="#451020" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="pn-fingers">
+      <rect x="196" y="160" width="66" height="24" rx="12" fill="#f1d9c8" stroke="#451020" stroke-width="5"/>
+      <rect x="204" y="188" width="58" height="24" rx="12" fill="#f1d9c8" stroke="#451020" stroke-width="5"/>
+    </g>
+    <g id="pn-glass">
+      <path d="M0 0 Q2 56 44 72 L44 130 Q20 136 14 148 L118 148 Q112 136 88 130 L88 72 Q130 56 132 0 Z" fill="none" stroke="#451020" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M8 14 Q12 50 48 64 L84 64 Q120 50 124 14 Z" fill="#7d2944"/>
+    </g>
+  </defs>
+
+  <g class="scene s1">
+    <use href="#pn-face"/>
+    <use href="#pn-fingers"/>
+    <g transform="translate(470,120)"><use href="#pn-glass"/></g>
+    <circle cx="620" cy="40" r="7" fill="#65182f"/>
+    <text x="380" y="418" font-size="27" font-weight="800" fill="#451020" text-anchor="middle">1 · Nase sanft mit zwei Fingern zuhalten</text>
+    <text x="380" y="448" font-size="17" fill="#786d70" text-anchor="middle">Die Nase bleibt in den nächsten Schritten geschlossen.</text>
+  </g>
+
+  <g class="scene s2">
+    <use href="#pn-face"/>
+    <use href="#pn-fingers"/>
+    <g transform="translate(300,180) rotate(-38)"><use href="#pn-glass"/></g>
+    <circle cx="646" cy="40" r="7" fill="#65182f"/>
+    <text x="380" y="418" font-size="27" font-weight="800" fill="#451020" text-anchor="middle">2 · Kleinen Schluck nehmen – Nase bleibt zu</text>
+    <text x="380" y="448" font-size="17" fill="#786d70" text-anchor="middle">Nur ein kleiner Schluck, noch nicht schlucken.</text>
+  </g>
+
+  <g class="scene s3">
+    <use href="#pn-face"/>
+    <use href="#pn-fingers"/>
+    <path d="M196 262 q10 22 2 44" stroke="#65182f" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M188 300 l10 14 12 -10" stroke="#65182f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(470,150)"><use href="#pn-glass"/></g>
+    <path d="M478 320 h116" stroke="#b7a08e" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="672" cy="40" r="7" fill="#65182f"/>
+    <text x="380" y="418" font-size="27" font-weight="800" fill="#451020" text-anchor="middle">3 · Schlucken und das Glas kurz absetzen</text>
+    <text x="380" y="448" font-size="17" fill="#786d70" text-anchor="middle">Die Nase ist dabei immer noch geschlossen.</text>
+  </g>
+
+  <g class="scene s4">
+    <use href="#pn-face"/>
+    <path class="breath" d="M244 208 q46 10 78 44" stroke="#466d8c" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path class="breath" d="M240 230 q34 22 48 58" stroke="#466d8c" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M318 244 l14 12 -4 -20" stroke="#466d8c" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(470,150)"><use href="#pn-glass"/></g>
+    <path d="M478 320 h116" stroke="#b7a08e" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="698" cy="40" r="7" fill="#65182f"/>
+    <text x="380" y="418" font-size="27" font-weight="800" fill="#451020" text-anchor="middle">4 · Nase öffnen und ruhig ausatmen</text>
+    <text x="380" y="448" font-size="17" fill="#786d70" text-anchor="middle">Jetzt steigt der Aromaschub über den Rachen zur Nase auf.</text>
+  </g>
+
+  <g class="scene s5">
+    <use href="#pn-face"/>
+    <g transform="translate(236,196) scale(0.72)"><use href="#pn-glass"/></g>
+    <path d="M300 176 q10 -18 0 -34 M322 184 q12 -20 2 -40" stroke="#9b731d" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="724" cy="40" r="7" fill="#65182f"/>
+    <text x="380" y="418" font-size="27" font-weight="800" fill="#451020" text-anchor="middle">5 · Erneut am Glas riechen und vergleichen</text>
+    <text x="380" y="448" font-size="17" fill="#786d70" text-anchor="middle">Wie stark unterscheidet sich der Eindruck? Das ist deine 1–5-Wertung.</text>
+  </g>
+</svg>
