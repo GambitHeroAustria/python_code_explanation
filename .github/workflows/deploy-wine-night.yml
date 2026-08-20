@@ -1,16 +1,40 @@
 name: Validate Wine Night App
 
-# Der frühere Sync-Job hat index.html aus einer Supabase Edge Function ins Repo
-# kopiert (Deployment -> Repo). Das Repo ist jetzt die kanonische Quelle; dieser
-# Workflow validiert nur noch, dass der Dateisatz vollständig und autonom ist.
+# Git ist die kanonische Quelle. Vercel baut main anhand von vercel.json; dieser
+# Check prueft davor denselben Dateisatz statisch und in echtem Chromium.
 on:
   push:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wine-night-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - name: Validate file set
         run: bash scripts/validate.sh
+      - name: Install browser test dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run browser flows against real Supabase
+        run: |
+          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/weinabend-http.log 2>&1 &
+          for attempt in {1..20}; do
+            curl -fsS http://127.0.0.1:8123/ >/dev/null && break
+            sleep 0.25
+          done
+          BASE=http://127.0.0.1:8123 npm run test:frontend

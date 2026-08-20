@@ -1,6 +1,6 @@
 // Browser-Check des ausgelieferten Frontends gegen die echte Supabase.
 //
-//   node --version >/dev/null && npm i playwright        # einmalig, im Scratchpad
+//   npm ci                                                # einmalig
 //   python3 -m http.server 8123 --bind 127.0.0.1 &       # lokaler Test
 //   node tests/frontend-check.js
 //   BASE=https://weinabend-blind-live.vercel.app node tests/frontend-check.js
@@ -8,12 +8,9 @@
 // Fuer eine geschuetzte Preview zusaetzlich SHARE=<share-url> setzen; jeder
 // Browser-Kontext ruft sie einmal auf, um das Cookie zu setzen.
 //
-// Zwei Umgebungs-Eigenheiten, die Zeit gekostet haben:
-//  - Der Agent-Proxy terminiert TLS neu und kommt mit Chromiums TLS-1.3-
-//    Handshake nicht klar (ERR_CONNECTION_RESET auf JEDE https-Adresse).
-//    --ssl-version-max=tls1.2 loest es; die Zertifikatspruefung bleibt aktiv.
-//  - Chromium liegt unter /opt/pw-browsers/chromium-1194/, nicht unter
-//    /opt/pw-browsers/chromium/.
+// Fuer Agent-Umgebungen koennen CHROMIUM_EXECUTABLE_PATH, AGENT_PROXY_URL und
+// CHROMIUM_TLS_MAX gesetzt werden. In GitHub Actions nutzt Playwright seine
+// normal installierte Chromium-Version ohne Proxy-Sonderfall.
 //
 // Der Test betritt bewusst KEINEN Verkostungsraum: das wuerde ueber
 // join_tasting echte Teilnehmerdaten schreiben.
@@ -39,12 +36,12 @@ async function newCtx(browser) {
 }
 
 (async () => {
-  // Der Agent-Proxy terminiert TLS neu und vertraegt Chromiums TLS-1.3-Handshake nicht
-  // (ERR_CONNECTION_RESET). Deckel auf TLS 1.2 -- Zertifikatspruefung bleibt aktiv.
-  const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-    args: ['--no-sandbox', '--proxy-server=http://127.0.0.1:36199', '--ssl-version-max=tls1.2'],
-  });
+  const args = ['--no-sandbox'];
+  if (process.env.AGENT_PROXY_URL) args.push(`--proxy-server=${process.env.AGENT_PROXY_URL}`);
+  if (process.env.CHROMIUM_TLS_MAX) args.push(`--ssl-version-max=${process.env.CHROMIUM_TLS_MAX}`);
+  const launchOptions = { args };
+  if (process.env.CHROMIUM_EXECUTABLE_PATH) launchOptions.executablePath = process.env.CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch(launchOptions);
 
   // ---------- 1. Boot-Integritaet ----------
   let ctx = await newCtx(browser);

@@ -1,0 +1,11 @@
+{
+  "name": "weinabend-blind-tasting",
+  "private": true,
+  "scripts": {
+    "validate": "bash scripts/validate.sh",
+    "test:frontend": "node tests/frontend-check.js"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

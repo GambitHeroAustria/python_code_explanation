@@ -1,8 +1,13 @@
 # Deploy nach Vercel
 
-Das Vercel-Projekt `weinabend-blind-live` ist **nicht** mit Git verbunden – ein
-`git push` löst kein Deploy aus. Ein Deploy ist immer ein expliziter Schritt über
-den Vercel-Connector.
+Der Zielzustand ist die Vercel-Git-Integration mit
+`GambitHeroAustria/python_code_explanation`, Produktionsbranch `main`. Die
+Root-`vercel.json` baut über `deploy/build-from-checkout.sh` und veröffentlicht
+ausschließlich die 16 Dateien aus `scripts/site-files.txt`. Tests,
+Dokumentation und Deploy-Helfer werden dadurch nicht öffentlich ausgeliefert.
+
+Solange die Git-Integration noch nicht einmalig im Vercel-Dashboard verbunden
+ist, bleibt der Connector-Deploy unten als sicherer Fallback verfügbar.
 
 Früher wurden dabei alle Dateien einzeln als Payload hochgeladen. Das ist
 fehleranfällig: `app5.js` allein hat ~46 KB minifiziertes JavaScript, und ein
@@ -30,12 +35,10 @@ Danach über den Vercel-Connector deployen (`deploy_to_vercel`, Projekt
 2. `target: "production"` → anonym über `weinabend-blind-live.vercel.app`
    dieselbe Prüfung wiederholen.
 
-## Zwei Fallstricke
+## Fallstricke
 
-- **`scripts/validate.sh` läuft nicht im Vercel-Container.** Es nutzt Process
-  Substitution (`< <(...)`), und dort fehlt `/dev/fd`. Deshalb läuft es lokal in
-  `prepare.sh`; der `sha256sum`-Vergleich im Build ist ohnehin die strengere
-  Prüfung.
+- `scripts/validate.sh` ist absichtlich POSIX-nah und benoetigt kein `/dev/fd`.
+  Es laeuft lokal, in GitHub Actions und im Vercel-Build.
 - **Preview-Deployments bekommen von Vercel ein Feedback-Skript in
   `index.html` injiziert.** Auf der Preview weicht deshalb genau diese eine
   Prüfsumme ab – das ist normal. Production liefert `index.html` unverändert aus.
