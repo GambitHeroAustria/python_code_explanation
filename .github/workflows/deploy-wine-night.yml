@@ -1,32 +1,16 @@
-name: Sync Wine Night App
+name: Validate Wine Night App
 
+# Der frühere Sync-Job hat index.html aus einer Supabase Edge Function ins Repo
+# kopiert (Deployment -> Repo). Das Repo ist jetzt die kanonische Quelle; dieser
+# Workflow validiert nur noch, dass der Dateisatz vollständig und autonom ist.
 on:
   push:
-    branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  sync:
-    if: github.actor != 'github-actions[bot]'
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch current app build
-        run: |
-          curl -fsSL 'https://ttympdkjbtuspmroasae.supabase.co/functions/v1/wine-night-gh?event=BURGUND' -o index.html
-          test -s index.html
-          grep -qi '<!doctype html' index.html
-      - name: Commit refreshed app
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          if git diff --cached --quiet; then
-            echo 'App already current'
-          else
-            git commit -m 'Refresh wine app [skip ci]'
-            git push
-          fi
+      - name: Validate file set
+        run: bash scripts/validate.sh
