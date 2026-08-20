@@ -12,6 +12,14 @@
 
 @media(max-width:560px){.pairidentity{gap:9px}.blindduo{width:50px;height:50px;flex-basis:50px}.blindduo .bottle{height:29px}.archivewine{grid-template-columns:46px 1fr;padding:11px}.archivebottle{width:39px;height:58px}.archivefacts{grid-template-columns:1fr}.eventtabs{position:sticky;top:0;z-index:6;backdrop-filter:blur(8px)}}
 
+/* Host-Steuerung */
+.hostrow{display:flex;justify-content:center;margin:14px 0 4px}
+.hostrow .hostexit{margin-top:0;color:var(--m);font-size:.82rem}
+.hostgate{max-width:430px;margin-left:auto;margin-right:auto}
+.hostgate .ey{color:var(--m)}
+.hostgate input{letter-spacing:.12em}
+.hostfooter{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+
 /* Postnasal-Anleitung (nur OLIRED-Bewertungsblock) */
 .postnasalguide{display:block;margin:12px 0 6px}
 .postnasalguide img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid #e3d0bd;background:#fdf8f2}
