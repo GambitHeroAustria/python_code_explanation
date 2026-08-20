@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "bash deploy/build-from-checkout.sh",
+  "outputDirectory": "public",
+  "installCommand": ""
+}
