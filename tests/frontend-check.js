@@ -141,7 +141,43 @@ async function newCtx(browser) {
   ok('Kiosk fuehrt ebenfalls auf den PIN-Screen', await page.isVisible('#hostinput'));
   await ctx.close();
 
-  // ---------- 10. Assets werden korrekt ausgeliefert ----------
+  // ---------- 10. Axel hat einen eigenen, tokengebundenen Host-Tab ----------
+  ctx = await newCtx(browser);
+  page = await ctx.newPage();
+  let participantHostPayload = null;
+  await page.addInitScript(() => {
+    localStorage.setItem('wt_app_version', 'stable-kiosk-20260818-1');
+    localStorage.setItem('wt_portal_name_BURGUND', 'Axel');
+    localStorage.setItem('wt_SOLOW1', JSON.stringify({ name: 'Axel', token: 'browser-probe-token' }));
+  });
+  await page.route('**/rest/v1/rpc/participant_host_get_event_state', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      title: 'Weinabend – Blindverkostungen',
+      rooms: [{
+        code: 'SOLOW1', theme: 'Weißwein · Sancerre', tasting_type: 'white_solo',
+        phase: 'tasting', participants: 3, tasting_done: 3, guesses_done: 3,
+      }],
+    }),
+  }));
+  await page.route('**/rest/v1/rpc/participant_host_set_room_phase', async route => {
+    participantHostPayload = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, phase: 'revealed' }) });
+  });
+  page.on('dialog', dialog => dialog.accept());
+  await page.goto(`${BASE}/?event=BURGUND&tab=host`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+  ok('Axel sieht ein eigenes Host-Tab', await page.isVisible('.eventtabs a:has-text("Host")'));
+  ok('Axels Host-Tab laedt die Rundensteuerung', (await page.textContent('#app')).includes('Runden freigeben'));
+  ok('Sancerre-Aufloesung ist bei 3/3 freigeschaltet', await page.isEnabled('[data-player-host-phase="revealed"][data-room="SOLOW1"]'));
+  await page.click('[data-player-host-phase="revealed"][data-room="SOLOW1"]');
+  await page.waitForTimeout(700);
+  ok('Axel-Freigabe ruft die Teilnehmer-Host-RPC auf', participantHostPayload?.p_room_code === 'SOLOW1' && participantHostPayload?.p_phase === 'revealed', JSON.stringify(participantHostPayload));
+  ok('Axels Teilnehmer-Token wird an die Autorisierungspruefung uebergeben', participantHostPayload?.p_participant_tokens?.includes('browser-probe-token'), JSON.stringify(participantHostPayload));
+  await ctx.close();
+
+  // ---------- 11. Assets werden korrekt ausgeliefert ----------
   ctx = await newCtx(browser);
   page = await ctx.newPage();
   const assets = [

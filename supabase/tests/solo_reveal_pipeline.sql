@@ -29,9 +29,15 @@ begin
   from (select public.get_event_overview('BURGUND') x) q;
 
   begin
-    v_result := public.host_set_room_phase(
+    v_result := public.participant_host_set_room_phase(
       'BURGUND',
-      (select host_token from public.tasting_events where upper(code)='BURGUND'),
+      array[(
+        select p.participant_token
+        from public.participants p
+        join public.rooms r on r.id=p.room_id
+        where r.code='SOLOW1' and lower(btrim(p.display_name))='axel'
+        limit 1
+      )],
       'SOLOW1',
       'revealed'
     );
